@@ -16,29 +16,39 @@ def IsOverBlack():
     else:
         return False
 
+# Track the last direction the robot swept to find the line
+# True = left, False = right
+LastFoundDirection = True
+
 # Search for the black line
-# Stop, wait, then sweep left/right at minimum speed until found
+# Start seeking in the opposite direction to where we last found it,
+# since the line likely curved the other way
 def SeekLine():
+    global LastFoundDirection
     print("Line lost - stopping")
     robot.stop()
     time.sleep(0.5)
 
-    SweepTime = 1.5   # seconds per sweep
-    Direction = True   # True = left first
+    SweepTime = 0.5   # seconds per sweep
+    TurnSpeed = 0.3   # Speed to turn at while seeking
+    # Start in the opposite direction to where we last found the line
+    Direction = not LastFoundDirection
 
     while True:
         if Direction:
             print("Sweeping left")
-            robot.left(0.1)
+            robot.left(TurnSpeed)
         else:
             print("Sweeping right")
-            robot.right(0.1)
+            robot.right(TurnSpeed)
 
         # Turn for SweepTime, checking the sensor continuously
         StartTime = time.time()
         while time.time() - StartTime < SweepTime:
             if IsOverBlack():
                 robot.stop()
+                # Remember which direction found the line this time
+                LastFoundDirection = Direction
                 return
 
         robot.stop()
