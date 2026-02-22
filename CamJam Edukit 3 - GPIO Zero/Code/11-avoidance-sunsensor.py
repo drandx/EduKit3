@@ -22,8 +22,12 @@ TurnStep = 0.5    # How long each little turn lasts (seconds)
 
 
 # Check how far the wall is (in centimeters)
+# If the sensor glitches, assume no wall (keep going)
 def wall_distance():
-    return sensor.distance
+    try:
+        return sensor.distance
+    except OSError:
+        return 150.0
 
 
 # Turn a little bit at a time until the way is clear
@@ -83,10 +87,14 @@ try:
             find_clear_path()
 
         # Read the ambient light and add it to our total
-        LightTotal += sensor.light
-        LightCount += 1
-
-        print(f"Light: {sensor.light}  |  Distance: {sensor.distance:.1f} cm")
+        try:
+            Light = sensor.light
+            Distance = sensor.distance
+            LightTotal += Light
+            LightCount += 1
+            print(f"Light: {Light}  |  Distance: {Distance:.1f} cm")
+        except OSError:
+            print("Sensor glitch, skipping read")
 
         # Every few seconds, save the average light to the log file
         if time.time() - LastLogTime >= LogInterval:
