@@ -18,6 +18,8 @@ sun = SunSensor()
 
 # How fast the robot moves (0.0 = stopped, 1.0 = full speed)
 speed = 0.5
+# Slower speed for turning when the line is lost
+turn_speed = 0.2
 
 # Keep all light readings so we can calculate an average
 light_readings = []
@@ -37,8 +39,9 @@ def lineseen():
 
 # What to do when the sensor loses the black line
 def linenotseen():
-    print("Line lost - turn to find it")
-    robot.right(speed)
+    print("Line lost - stopping, then turning slowly")
+    robot.stop()
+    robot.right(turn_speed)
 
 
 # Connect the line sensor to our functions
