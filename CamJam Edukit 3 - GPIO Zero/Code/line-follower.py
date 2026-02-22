@@ -31,7 +31,7 @@ def SeekLine():
     robot.stop()
     time.sleep(0.5)
 
-    SweepTime = 0.5       # seconds per sweep turn
+    SweepTime = 0.2       # seconds per sweep turn
     TurnSpeed = 0.3       # speed while sweeping
     MoveSpeed = 0.3       # speed while repositioning
     SweepsPerRound = 2    # left + right = one round
