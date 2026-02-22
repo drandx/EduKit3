@@ -17,9 +17,9 @@ robot = CamJamKitRobot()
 sun = SunSensor()
 
 # How fast the robot moves (0.0 = stopped, 1.0 = full speed)
-speed = 0.5
+speed = 1.0
 # Slower speed for turning when the line is lost
-turn_speed = 0.2
+turn_speed = 0.5
 
 # Keep all light readings so we can calculate an average
 light_readings = []
@@ -39,6 +39,7 @@ def lineseen():
 
 # What to do when the sensor loses the black line
 def linenotseen():
+    time.sleep(0.5)
     print("Line lost - stopping, then turning slowly")
     robot.stop()
     robot.right(turn_speed)
