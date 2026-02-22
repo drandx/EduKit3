@@ -21,7 +21,7 @@ def SeekLine():
     print("Seeking the line")
     # The direction the robot will turn - True = Left
     Direction = True
-    SeekSize = 0.2 # Turn time
+    SeekSize = 0.1 # Turn time
     SeekCount = 1 # A count of times the robot has looked for the line
     MaxSeekCount = 5 # Reset sweep size after this many attempts
 
