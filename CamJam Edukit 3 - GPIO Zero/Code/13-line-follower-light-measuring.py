@@ -20,8 +20,14 @@ sun = SunSensor()
 speed = 0.6
 # Gentle speed for searching turns when the line is lost
 turn_speed = 0.3
-# How long each search sweep lasts (seconds) — short so we don't overshoot
-sweep_duration = 0.15
+# How long each search sweep lasts (seconds) — grows with each attempt
+sweep_duration = 0.1
+# How much longer each successive sweep gets
+sweep_increment = 0.05
+# Cap so it doesn't swing too far
+sweep_max = 0.4
+# Pause between sweeps so the sensor can settle
+sweep_pause = 0.1
 
 # Keep all light readings so we can calculate an average
 light_readings = []
@@ -39,6 +45,7 @@ try:
 
     last_report = time.time()
     sweep_direction = 1  # 1 = right, -1 = left
+    current_sweep = sweep_duration  # grows each miss, resets on line found
 
     # Keep running until we press CTRL+C
     while True:
@@ -46,15 +53,21 @@ try:
         if linesensor.line_detected:
             print("Line detected! Moving forward.")
             robot.forward(speed)
+            current_sweep = sweep_duration  # reset sweep angle
         else:
-            print("Line lost! Sweeping search.")
-            # Short gentle turn, then alternate direction for next time
+            print(f"Line lost! Sweep {current_sweep:.2f}s "
+                  f"{'right' if sweep_direction == 1 else 'left'}")
+            # Turn for the current sweep duration
             if sweep_direction == 1:
                 robot.right(turn_speed)
             else:
                 robot.left(turn_speed)
-            time.sleep(sweep_duration)
+            time.sleep(current_sweep)
             robot.stop()
+            # Pause so the sensor can settle before next check
+            time.sleep(sweep_pause)
+            # Widen the next sweep and flip direction
+            current_sweep = min(current_sweep + sweep_increment, sweep_max)
             sweep_direction *= -1
 
         # --- Light measuring ---
