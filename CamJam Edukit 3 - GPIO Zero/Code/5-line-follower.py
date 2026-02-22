@@ -9,6 +9,13 @@ sensor = Button(pinLineFollower)
 
 robot = CamJamKitRobot()
 
+# Seeking configuration constants
+SeekSize = 0.1        # Initial sweep duration
+SeekIncrement = 0.05  # Added each attempt
+SeekMax = 0.4         # Maximum sweep cap
+TurnSpeed = 0.3       # Seeking turn speed
+ForwardSpeed = 0.4    # Normal forward speed
+
 # Return True if the line detector is over a black line
 def IsOverBlack():
     if sensor.is_pressed:
@@ -21,21 +28,20 @@ def SeekLine():
     print("Seeking the line")
     # The direction the robot will turn - True = Left
     Direction = True
-    SeekSize = 0.1 # Turn time (short sweeps)
     SeekCount = 1 # A count of times the robot has looked for the line
 
     # Turn the robot left and right until it finds the line
     while True:
-        # Set the seek time
-        SeekTime = SeekSize * SeekCount
+        # Set the seek time with additive growth and cap
+        SeekTime = min(SeekSize + (SeekIncrement * (SeekCount - 1)), SeekMax)
 
         # Start the motors turning in a direction
         if Direction:
             print("Looking left")
-            robot.left(0.4)
+            robot.left(TurnSpeed)
         else:
             print("Looking Right")
-            robot.right(0.4)
+            robot.right(TurnSpeed)
 
         # Save the time it is now
         StartTime = time.time()
@@ -50,7 +56,7 @@ def SeekLine():
         # The robot has not found the black line yet, so stop
         robot.stop()
 
-        time.sleep(0.05)
+        time.sleep(0.1)
 
         # Increase the seek count
         SeekCount += 1
@@ -62,7 +68,7 @@ try:
     print("Following the line")
     while True:
         if IsOverBlack():
-            robot.forward(0.4)
+            robot.forward(ForwardSpeed)
         else:
             robot.stop()
             SeekLine()
