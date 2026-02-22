@@ -6,6 +6,7 @@
 
 import time
 import random
+from datetime import datetime
 from gpiozero import CamJamKitRobot
 from sunsensor import SunSensor
 
@@ -47,9 +48,29 @@ def find_clear_path():
     print("  Clear! Going forward.")
 
 
+# === Logging setup ===
+LogFile = "explorer_log.txt"
+LogInterval = 5  # Write to log every 5 seconds
+
+# Track light readings for the average
+LightTotal = 0
+LightCount = 0
+
+
 # === Main program - runs forever! ===
 try:
+    StartTime = datetime.now()
+
+    # Start a fresh log file (overwrites the old one)
+    log = open(LogFile, "w")
+    log.write("Room Explorer Log\n")
+    log.write("Started: " + str(StartTime) + "\n\n")
+    log.flush()
+
     print("Room Explorer starting!")
+    print("Logging to " + LogFile)
+
+    LastLogTime = time.time()
 
     while True:
         # Drive forward
@@ -61,7 +82,31 @@ try:
             robot.stop()
             find_clear_path()
 
+        # Read the ambient light and add it to our total
+        LightTotal += sensor.light
+        LightCount += 1
+
+        # Every few seconds, save the average light to the log file
+        if time.time() - LastLogTime >= LogInterval:
+            AvgLight = LightTotal / LightCount
+            log.write(str(datetime.now()) + " | Avg light: " + str(round(AvgLight, 1)) + "\n")
+            log.flush()
+            LastLogTime = time.time()
+
 except KeyboardInterrupt:
-    robot.stop()
-    sensor.close()
-    print("Stopped!")
+    pass
+
+# Write the final summary (works for Ctrl+C, may not survive battery death)
+EndTime = datetime.now()
+Duration = EndTime - StartTime
+if LightCount > 0:
+    AvgLight = LightTotal / LightCount
+    log.write("\nFinished: " + str(EndTime) + "\n")
+    log.write("Duration: " + str(Duration) + "\n")
+    log.write("Final avg light: " + str(round(AvgLight, 1)) + "\n")
+    log.flush()
+log.close()
+
+robot.stop()
+sensor.close()
+print("Stopped! Log saved to " + LogFile)
