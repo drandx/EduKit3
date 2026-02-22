@@ -1,61 +1,67 @@
-# CamJam EduKit 3 - Robotics
-# Obstacle Avoidance using SunSensor (VCNL4200 proximity)
+# Room Explorer Robot
+# Drives around a room. When it sees a wall, it turns
+# little by little until the way is clear, then keeps going.
+# Runs forever until the battery runs out!
+# Uses the SunSensor (VCNL4200 proximity sensor).
 
 import time
+import random
 from gpiozero import CamJamKitRobot
 from sunsensor import SunSensor
 
+# Set up the robot and the proximity sensor
 robot = CamJamKitRobot()
 sensor = SunSensor()
 
-# Distance threshold in cm — objects closer than this trigger avoidance
-hownear = 15.0
-reversetime = 0.5
-turntime = 0.75
-
-# Set the relative speeds of the two motors, between 0.0 and 1.0
-leftmotorspeed = 0.5
-rightmotorspeed = 0.5
-
-motorforward = (leftmotorspeed, rightmotorspeed)
-motorbackward = (-leftmotorspeed, -rightmotorspeed)
-motorleft = (leftmotorspeed, 0)
-motorright = (0, rightmotorspeed)
+# === Settings you can change ===
+TooClose = 15.0    # How close to a wall before turning (centimeters)
+Speed = 0.5        # How fast the robot drives (0.0 to 1.0)
+TurnSpeed = 0.3    # How fast the robot turns (0.0 to 1.0)
+TurnStep = 0.15    # How long each little turn lasts (seconds)
 
 
-def isnearobstacle(localhownear):
-    distance = sensor.distance
-
-    print("IsNearObstacle: " + str(distance))
-    if distance < localhownear:
-        print("Too close!")
-        return True
-    else:
-        return False
+# Check how far the wall is (in centimeters)
+def wall_distance():
+    return sensor.distance
 
 
-def avoidobstacle():
-    # Back off a little
-    print("Backwards")
-    robot.value = motorbackward
-    time.sleep(reversetime)
-    robot.stop()
+# Turn a little bit at a time until the way is clear
+def find_clear_path():
+    print("Wall ahead! Scanning...")
 
-    # Turn right
-    print("Right")
-    robot.value = motorright
-    time.sleep(turntime)
-    robot.stop()
+    # Pick a direction: left most of the time (works best in a square loop)
+    GoLeft = random.choice([True, True, True, False])
+
+    # Keep turning in small steps until the path is clear
+    while wall_distance() < TooClose:
+        if GoLeft:
+            print("  Turning left")
+            robot.left(TurnSpeed)
+        else:
+            print("  Turning right")
+            robot.right(TurnSpeed)
+        time.sleep(TurnStep)
+        robot.stop()
+        time.sleep(0.1)  # Short pause so the sensor can measure
+
+    print("  Clear! Going forward.")
 
 
+# === Main program - runs forever! ===
 try:
+    print("Room Explorer starting!")
+
     while True:
-        robot.value = motorforward
-        time.sleep(0.1)
-        if isnearobstacle(hownear):
+        # Drive forward
+        robot.forward(Speed)
+        time.sleep(0.05)
+
+        # If a wall is close, stop and find a new way
+        if wall_distance() < TooClose:
             robot.stop()
-            avoidobstacle()
+            find_clear_path()
 
 except KeyboardInterrupt:
     robot.stop()
     sensor.close()
+    print("Stopped!")
