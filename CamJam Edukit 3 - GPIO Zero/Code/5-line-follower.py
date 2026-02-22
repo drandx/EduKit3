@@ -16,7 +16,7 @@ SeekMax = 0.3         # Maximum sweep cap
 TurnSpeed = 0.3      # Seeking turn speed (min 0.2 for motor movement)
 ForwardSpeed = 0.3   # Normal forward speed
 ForwardTime = 0.05   # Forward pulse duration (aggressive - very frequent checks)
-BackwardTime = 0.15  # Reverse duration when line is lost
+BackwardTime = 0.3  # Reverse duration when line is lost
 
 # Return True if the line detector is over a black line
 def IsOverBlack():
