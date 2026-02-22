@@ -28,7 +28,7 @@ def wall_distance():
 
 # Turn a little bit at a time until the way is clear
 def find_clear_path():
-    print("Wall ahead! Scanning..." + wall_distance())
+    print(f"Wall ahead! Scanning... Distance: {wall_distance()}" )
 
     # Pick a direction: left most of the time (works best in a square loop)
     GoLeft = random.choice([True, True, True, False])
