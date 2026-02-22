@@ -17,9 +17,9 @@ robot = CamJamKitRobot()
 sun = SunSensor()
 
 # How fast the robot moves (0.0 = stopped, 1.0 = full speed)
-speed = 0.5
+speed = 0.6
 # Slower speed for turning when the line is lost
-turn_speed = 0.2
+turn_speed = 0.4
 
 # Keep all light readings so we can calculate an average
 light_readings = []
