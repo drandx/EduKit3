@@ -44,8 +44,10 @@ try:
     while True:
         # --- Line following (polled every loop) ---
         if linesensor.line_detected:
+            print("Line detected! Moving forward.")
             robot.forward(speed)
         else:
+            print("Line lost! Sweeping search.")
             # Short gentle turn, then alternate direction for next time
             if sweep_direction == 1:
                 robot.right(turn_speed)
