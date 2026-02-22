@@ -23,11 +23,11 @@ def SeekLine():
     Direction = True
     SeekSize = 0.2 # Turn time
     SeekCount = 1 # A count of times the robot has looked for the line
-    MaxSeekCount = 5 # The maximum time to seek the line in one direction
+    MaxSeekCount = 5 # Reset sweep size after this many attempts
 
     # Turn the robot left and right until it finds the line
-    # Or it has been searched for long enough
-    while SeekCount <= MaxSeekCount:
+    # Resets and keeps trying instead of giving up
+    while True:
         # Set the seek time
         SeekTime = SeekSize * SeekCount
 
@@ -60,8 +60,10 @@ def SeekLine():
         # Change direction
         Direction = not Direction
 
-    # The line wasn't found
-    return False
+        # After a full cycle, reset to small sweeps and keep trying
+        if SeekCount > MaxSeekCount:
+            print("Full sweep done, restarting search")
+            SeekCount = 1
 
 try:
     print("Following the line")
@@ -70,12 +72,8 @@ try:
             robot.forward(0.4)
         else:
             robot.stop()
-            if SeekLine() == False:
-                robot.stop()
-                print("The robot has lost the line")
-                exit()
-            else:
-                print("Following the line")
+            SeekLine()
+            print("Following the line")
 
 except KeyboardInterrupt:
     robot.stop()
