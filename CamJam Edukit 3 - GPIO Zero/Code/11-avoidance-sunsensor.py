@@ -17,6 +17,7 @@ sensor = SunSensor()
 # === Settings you can change ===
 TooClose = 90    # How close to a wall before turning (centimeters)
 Speed = 0.5        # How fast the robot drives (0.0 to 1.0)
+Drift = 0.05       # Make left motor a bit slower so robot goes straight
 TurnSpeed = 0.5    # How fast the robot turns (0.0 to 1.0)
 TurnStep = 0.5    # How long each little turn lasts (seconds)
 
@@ -77,8 +78,8 @@ try:
     LastLogTime = time.time()
 
     while True:
-        # Drive forward
-        robot.forward(Speed)
+        # Drive forward (left wheel, right wheel)
+        robot.value = (Speed - Drift, Speed)
         time.sleep(0.05)
 
         # If a wall is close, stop and find a new way
