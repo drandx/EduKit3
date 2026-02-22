@@ -17,7 +17,7 @@ sensor = SunSensor()
 # === Settings you can change ===
 TooClose = 90    # How close to a wall before turning (centimeters)
 Speed = 0.5        # How fast the robot drives (0.0 to 1.0)
-Drift = 0.2       # Make left motor a bit slower so robot goes straight
+Drift = 0.15       # Make left motor a bit slower so robot goes straight
 TurnSpeed = 0.5    # How fast the robot turns (0.0 to 1.0)
 TurnStep = 0.5    # How long each little turn lasts (seconds)
 
