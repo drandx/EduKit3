@@ -16,7 +16,6 @@ SeekMax = 0.3         # Maximum sweep cap
 TurnSpeed = 0.3      # Seeking turn speed (min 0.2 for motor movement)
 ForwardSpeed = 0.3   # Normal forward speed
 ForwardTime = 0.05   # Forward pulse duration (aggressive - very frequent checks)
-BackwardTime = 0.3  # Reverse duration when line is lost
 
 # Return True if the line detector is over a black line
 def IsOverBlack():
@@ -28,17 +27,6 @@ def IsOverBlack():
 # Search for the black line - never gives up
 def SeekLine():
     print("Seeking the line")
-
-    # First, reverse in case we overshot the line
-    print("Reversing")
-    robot.backward(ForwardSpeed)
-    StartTime = time.time()
-    while time.time() - StartTime <= BackwardTime:
-        if IsOverBlack():
-            robot.stop()
-            return
-    robot.stop()
-
     # The direction the robot will turn - True = Left
     Direction = True
     SeekCount = 1 # A count of times the robot has looked for the line
