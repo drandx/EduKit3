@@ -18,7 +18,7 @@ sensor = SunSensor()
 TooClose = 80    # How close to a wall before turning (centimeters)
 Speed = 0.5        # How fast the robot drives (0.0 to 1.0)
 TurnSpeed = 0.5    # How fast the robot turns (0.0 to 1.0)
-TurnStep = 0.05    # How long each little turn lasts (seconds)
+TurnStep = 0.5    # How long each little turn lasts (seconds)
 
 
 # Check how far the wall is (in centimeters)
