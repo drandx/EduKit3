@@ -24,28 +24,19 @@ def IsOverBlack():
     else:
         return False
 
-# Search for the black line - optimized for left-turn track
+# Search for the black line - never gives up
 def SeekLine():
     print("Seeking the line")
+    # The direction the robot will turn - True = Left
+    Direction = True
+    SeekCount = 1 # A count of times the robot has looked for the line
 
-    # First, do a longer left sweep since turns are always left
-    print("Looking left (priority)")
-    robot.left(TurnSpeed)
-    StartTime = time.time()
-    while time.time() - StartTime <= SeekMax:
-        if IsOverBlack():
-            robot.stop()
-            return
-    robot.stop()
-    time.sleep(0.1)
-
-    # If not found, fall back to alternating sweeps
-    Direction = False  # Start right to return to center
-    SeekCount = 1
-
+    # Turn the robot left and right until it finds the line
     while True:
+        # Set the seek time with additive growth and cap
         SeekTime = min(SeekSize + (SeekIncrement * (SeekCount - 1)), SeekMax)
 
+        # Start the motors turning in a direction
         if Direction:
             print("Looking left")
             robot.left(TurnSpeed)
@@ -53,15 +44,25 @@ def SeekLine():
             print("Looking right")
             robot.right(TurnSpeed)
 
+        # Save the time it is now
         StartTime = time.time()
+
+        # While the robot is turning for SeekTime seconds
+        # check to see whether the line detector is over black
         while time.time() - StartTime <= SeekTime:
             if IsOverBlack():
                 robot.stop()
                 return
 
+        # The robot has not found the black line yet, so stop
         robot.stop()
+
         time.sleep(0.1)
+
+        # Increase the seek count
         SeekCount += 1
+
+        # Change direction
         Direction = not Direction
 
 try:
