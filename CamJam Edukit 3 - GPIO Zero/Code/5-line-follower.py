@@ -9,12 +9,12 @@ sensor = Button(pinLineFollower)
 
 robot = CamJamKitRobot()
 
-# Seeking configuration constants
-SeekSize = 0.1        # Initial sweep duration
-SeekIncrement = 0.05  # Added each attempt
-SeekMax = 0.4         # Maximum sweep cap
-TurnSpeed = 0.3       # Seeking turn speed
-ForwardSpeed = 0.4    # Normal forward speed
+# Seeking configuration constants (tuned for 2cm line)
+SeekSize = 0.08       # Initial sweep duration
+SeekIncrement = 0.03  # Added each attempt (smaller for narrow line)
+SeekMax = 0.3         # Maximum sweep cap
+TurnSpeed = 0.2       # Seeking turn speed (slower to not overshoot narrow line)
+ForwardSpeed = 0.3    # Normal forward speed (slower to stay on line)
 
 # Return True if the line detector is over a black line
 def IsOverBlack():
