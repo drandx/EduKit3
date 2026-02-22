@@ -18,8 +18,10 @@ sun = SunSensor()
 
 # How fast the robot moves (0.0 = stopped, 1.0 = full speed)
 speed = 0.6
-# Slower speed for turning when the line is lost
-turn_speed = 0.4
+# Gentle speed for searching turns when the line is lost
+turn_speed = 0.3
+# How long each search sweep lasts (seconds) — short so we don't overshoot
+sweep_duration = 0.15
 
 # Keep all light readings so we can calculate an average
 light_readings = []
@@ -38,11 +40,21 @@ def lineseen():
 
 
 # What to do when the sensor loses the black line
+# Sweep gently left/right in short bursts so we re-find the line on curves
+sweep_direction = 1  # 1 = right first, -1 = left first
+
 def linenotseen():
-    print("Line lost - stopping, then turning slowly")
+    global sweep_direction
+    print("Line lost - gentle sweep search")
+    # Do a short turn in the current sweep direction
+    if sweep_direction == 1:
+        robot.right(turn_speed)
+    else:
+        robot.left(turn_speed)
+    time.sleep(sweep_duration)
     robot.stop()
-    time.sleep(0.5)
-    robot.right(turn_speed)
+    # Alternate direction for the next call so we search both sides
+    sweep_direction *= -1
 
 
 # Connect the line sensor to our functions
