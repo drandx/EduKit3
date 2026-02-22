@@ -13,8 +13,8 @@ robot = CamJamKitRobot()
 SeekSize = 0.08       # Initial sweep duration
 SeekIncrement = 0.03  # Added each attempt (smaller for narrow line)
 SeekMax = 0.3         # Maximum sweep cap
-TurnSpeed = 0.2       # Seeking turn speed (slower to not overshoot narrow line)
-ForwardSpeed = 0.3    # Normal forward speed (slower to stay on line)
+TurnSpeed = 0.25      # Seeking turn speed (min 0.2 for motor movement)
+ForwardSpeed = 0.35   # Normal forward speed
 
 # Return True if the line detector is over a black line
 def IsOverBlack():
