@@ -32,45 +32,30 @@ log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 logfile = open(log_path, "w")
 logfile.write("timestamp,light,avg_light\n")
 
-
-# What to do when the sensor sees the black line
-def lineseen():
-    print("Line seen - go forward")
-    robot.forward(speed)
-
-
-# What to do when the sensor loses the black line
-# Sweep gently left/right in short bursts so we re-find the line on curves
-sweep_direction = 1  # 1 = right first, -1 = left first
-
-def linenotseen():
-    global sweep_direction
-    print("Line lost - gentle sweep search")
-    # Do a short turn in the current sweep direction
-    if sweep_direction == 1:
-        robot.right(turn_speed)
-    else:
-        robot.left(turn_speed)
-    time.sleep(sweep_duration)
-    robot.stop()
-    # Alternate direction for the next call so we search both sides
-    sweep_direction *= -1
-
-
-# Connect the line sensor to our functions
-linesensor.when_line = lineseen
-linesensor.when_no_line = linenotseen
-
 try:
     print("Line Follower with Light Measuring")
     print("Press CTRL+C to stop\n")
     robot.forward(speed)
 
     last_report = time.time()
+    sweep_direction = 1  # 1 = right, -1 = left
 
     # Keep running until we press CTRL+C
     while True:
-        # Read the light and save it
+        # --- Line following (polled every loop) ---
+        if linesensor.line_detected:
+            robot.forward(speed)
+        else:
+            # Short gentle turn, then alternate direction for next time
+            if sweep_direction == 1:
+                robot.right(turn_speed)
+            else:
+                robot.left(turn_speed)
+            time.sleep(sweep_duration)
+            robot.stop()
+            sweep_direction *= -1
+
+        # --- Light measuring ---
         reading = sun.light
         light_readings.append(reading)
         avg = sum(light_readings) / len(light_readings)
@@ -83,7 +68,7 @@ try:
             print(f"Light now: {reading}  |  Average: {avg:.0f}  |  Samples: {len(light_readings)}")
             last_report = now
 
-        time.sleep(0.1)
+        time.sleep(0.05)
 
 except KeyboardInterrupt:
     pass
