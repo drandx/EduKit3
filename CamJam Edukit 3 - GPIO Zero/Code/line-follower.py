@@ -22,19 +22,28 @@ LastFoundDirection = True
 
 # Search for the black line
 # Start seeking in the opposite direction to where we last found it,
-# since the line likely curved the other way
+# since the line likely curved the other way.
+# After a full sweep round (left + right) with no result, reposition
+# by driving right, then left, alternating between rounds.
 def SeekLine():
     global LastFoundDirection
     print("Line lost - stopping")
     robot.stop()
     time.sleep(0.5)
 
-    SweepTime = 0.5   # seconds per sweep
-    TurnSpeed = 0.3   # Speed to turn at while seeking
-    # Start in the opposite direction to where we last found the line
+    SweepTime = 0.5       # seconds per sweep turn
+    TurnSpeed = 0.3       # speed while sweeping
+    MoveSpeed = 0.3       # speed while repositioning
+    SweepsPerRound = 2    # left + right = one round
+    MoveDirection = False # first reposition goes right (False=right, True=left)
+
+    # Start sweeping opposite to where we last found the line
     Direction = not LastFoundDirection
+    SweepCount = 0        # how many sweeps done in this round
+    SearchTime = 0.0      # total time spent sweeping in this round
 
     while True:
+        # --- Sweep ---
         if Direction:
             print("Sweeping left")
             robot.left(TurnSpeed)
@@ -42,25 +51,48 @@ def SeekLine():
             print("Sweeping right")
             robot.right(TurnSpeed)
 
-        # Turn for SweepTime, checking the sensor continuously
         StartTime = time.time()
         while time.time() - StartTime < SweepTime:
             if IsOverBlack():
                 robot.stop()
-                # Remember which direction found the line this time
                 LastFoundDirection = Direction
                 return
 
         robot.stop()
-
-        # Flip direction for next sweep
+        SearchTime += SweepTime
+        SweepCount += 1
         Direction = not Direction
+
+        # --- After a full round, reposition and try again ---
+        if SweepCount >= SweepsPerRound:
+            if MoveDirection:
+                print(f"Repositioning left for {SearchTime:.1f}s")
+                robot.left(MoveSpeed)
+            else:
+                print(f"Repositioning right for {SearchTime:.1f}s")
+                robot.right(MoveSpeed)
+
+            # Drive for the tracked time, checking sensor while moving
+            StartTime = time.time()
+            while time.time() - StartTime < SearchTime:
+                if IsOverBlack():
+                    robot.stop()
+                    LastFoundDirection = MoveDirection
+                    return
+
+            robot.stop()
+            time.sleep(0.3)
+
+            # Reset for next round, flip reposition direction
+            MoveDirection = not MoveDirection
+            SweepCount = 0
+            SearchTime = 0.0
 
 try:
     print("Following the line")
     while True:
         if IsOverBlack():
-            robot.forward(0.4)
+            robot.forward(0.3)
         else:
             SeekLine()
             print("Following the line")
