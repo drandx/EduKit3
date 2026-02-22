@@ -39,9 +39,9 @@ def lineseen():
 
 # What to do when the sensor loses the black line
 def linenotseen():
-    time.sleep(0.5)
     print("Line lost - stopping, then turning slowly")
     robot.stop()
+    time.sleep(0.5)
     robot.right(turn_speed)
 
 
