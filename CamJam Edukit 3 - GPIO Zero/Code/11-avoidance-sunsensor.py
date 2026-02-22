@@ -86,6 +86,8 @@ try:
         LightTotal += sensor.light
         LightCount += 1
 
+        print(f"Light: {sensor.light}  |  Distance: {sensor.distance:.1f} cm")
+
         # Every few seconds, save the average light to the log file
         if time.time() - LastLogTime >= LogInterval:
             AvgLight = LightTotal / LightCount
