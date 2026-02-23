@@ -54,28 +54,33 @@ def find_clear_path():
 
 
 # === Logging setup ===
-LogFile = "explorer_log.txt"
-LogInterval = 5  # Write to log every 5 seconds
-
-# Track light readings for the average
-LightTotal = 0
-LightCount = 0
+HistoryFile = "explorer_history.txt"  # One line per run (never overwritten)
+LightFile = "explorer_light.txt"     # Light reading every 10 seconds
+LightInterval = 10  # Seconds between light readings
 
 
 # === Main program - runs forever! ===
 try:
     StartTime = datetime.now()
 
-    # Start a fresh log file (overwrites the old one)
-    log = open(LogFile, "w")
-    log.write("Room Explorer Log\n")
-    log.write("Started: " + str(StartTime) + "\n\n")
-    log.flush()
+    # Append start time to history (never overwritten)
+    try:
+        StartLight = sensor.light
+    except OSError:
+        StartLight = 0
+    history = open(HistoryFile, "a")
+    history.write(str(StartTime) + " | Light: " + str(StartLight) + "\n")
+    history.flush()
+    history.close()
+
+    # Open the light log (overwrites each run)
+    lightlog = open(LightFile, "w")
+    lightlog.write("Started: " + str(StartTime) + "\n")
+    lightlog.flush()
 
     print("Room Explorer starting!")
-    print("Logging to " + LogFile)
 
-    LastLogTime = time.time()
+    LastLightTime = time.time()
 
     while True:
         # Drive forward (left wheel, right wheel)
@@ -87,37 +92,26 @@ try:
             robot.stop()
             find_clear_path()
 
-        # Read the ambient light and add it to our total
-        try:
-            Light = sensor.light
-            Distance = sensor.distance
-            LightTotal += Light
-            LightCount += 1
-            print(f"Light: {Light}  |  Distance: {Distance:.1f} cm")
-        except OSError:
-            print("Sensor glitch, skipping read")
-
-        # Every few seconds, save the average light to the log file
-        if time.time() - LastLogTime >= LogInterval:
-            AvgLight = LightTotal / LightCount
-            log.write(str(datetime.now()) + " | Avg light: " + str(round(AvgLight, 1)) + "\n")
-            log.flush()
-            LastLogTime = time.time()
+        # Every 10 seconds, log the ambient light
+        if time.time() - LastLightTime >= LightInterval:
+            try:
+                Light = sensor.light
+                lightlog.write(str(datetime.now()) + " | Light: " + str(Light) + "\n")
+                lightlog.flush()
+                print(f"Light: {Light}")
+            except OSError:
+                print("Sensor glitch, skipping read")
+            LastLightTime = time.time()
 
 except KeyboardInterrupt:
-    pass
+    lightlog.write(str(datetime.now()) + " | Stopped by user\n")
+    lightlog.flush()
 
-# Write the final summary (works for Ctrl+C, may not survive battery death)
-EndTime = datetime.now()
-Duration = EndTime - StartTime
-if LightCount > 0:
-    AvgLight = LightTotal / LightCount
-    log.write("\nFinished: " + str(EndTime) + "\n")
-    log.write("Duration: " + str(Duration) + "\n")
-    log.write("Final avg light: " + str(round(AvgLight, 1)) + "\n")
-    log.flush()
-log.close()
+except Exception as error:
+    lightlog.write(str(datetime.now()) + " | CRASH: " + str(error) + "\n")
+    lightlog.flush()
 
+lightlog.close()
 robot.stop()
 sensor.close()
-print("Stopped! Log saved to " + LogFile)
+print("Stopped!")
