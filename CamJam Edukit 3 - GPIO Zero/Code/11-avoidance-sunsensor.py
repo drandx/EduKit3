@@ -6,6 +6,7 @@
 
 import time
 import random
+import signal
 from datetime import datetime
 from gpiozero import CamJamKitRobot
 from sunsensor import SunSensor
@@ -57,6 +58,13 @@ def find_clear_path():
 HistoryFile = "explorer_history.txt"  # One line per run (never overwritten)
 LightFile = "explorer_light.txt"     # Light reading every 10 seconds
 LightInterval = 10  # Seconds between light readings
+
+
+# Stop motors when systemd sends SIGTERM (e.g. systemctl stop)
+def handle_stop(signum, frame):
+    raise KeyboardInterrupt
+
+signal.signal(signal.SIGTERM, handle_stop)
 
 
 # === Main program - runs forever! ===
