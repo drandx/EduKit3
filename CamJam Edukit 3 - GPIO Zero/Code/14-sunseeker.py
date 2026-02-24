@@ -11,20 +11,21 @@ robot = CamJamKitRobot()
 sensor = SunSensor()
 
 # === Settings you can change ===
-TurnSpeed = 0.3      # How fast to spin while scanning
-TurnStep = 0.3       # How long each step lasts (seconds)
-Steps = 20           # How many steps in a full scan
+TurnSpeedLeft = 0.5      # Left motor speed
+TurnSpeedRight = 1     # Right motor speed (double, because it's slower)
+TurnStep = 0.3           # How long each step lasts (seconds)
+Steps = 20               # How many steps in a full scan
 
-# Turn left one step (right motor is inverted, so we flip it)
+# Turn left one step (right motor runs opposite direction)
 def turn_left():
-    robot.value = (-TurnSpeed, TurnSpeed)
+    robot.value = (-TurnSpeedLeft, -TurnSpeedRight)
     time.sleep(TurnStep)
     robot.stop()
     time.sleep(0.2)
 
-# Turn right one step (right motor is inverted, so we flip it)
+# Turn right one step (right motor runs opposite direction)
 def turn_right():
-    robot.value = (TurnSpeed, -TurnSpeed)
+    robot.value = (TurnSpeedLeft, TurnSpeedRight)
     time.sleep(TurnStep)
     robot.stop()
     time.sleep(0.2)
