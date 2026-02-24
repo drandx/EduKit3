@@ -30,33 +30,53 @@ def turn_right():
     time.sleep(0.2)
 
 try:
-    print("Sun Seeker starting!")
+    print("Sun Seeker starting! (Ctrl+C to stop)")
 
-    # Step 1: Spin left and measure light at each step
-    print("Scanning...")
-    BrightestLight = 0
-    BrightestStep = 0
+    while True:
+        # Step 1: Spin left and measure light at each step
+        print("Scanning...")
+        BrightestLight = 0
+        BrightestStep = 0
 
-    for Step in range(Steps):
-        Light = sensor.light
-        print(f"  Step {Step}: Light = {Light}")
+        for Step in range(Steps):
+            Light = sensor.light
+            print(f"  Step {Step}: Light = {Light}")
 
-        if Light > BrightestLight:
-            BrightestLight = Light
-            BrightestStep = Step
+            if Light > BrightestLight:
+                BrightestLight = Light
+                BrightestStep = Step
 
-        turn_left()
+            turn_left()
 
-    print(f"Brightest at step {BrightestStep} with light {BrightestLight}")
+        print(f"Brightest at step {BrightestStep} with light {BrightestLight}")
 
-    # Step 2: Turn right to go back to the brightest position
-    StepsBack = Steps - BrightestStep
-    print(f"Turning back {StepsBack} steps...")
+        # Step 2: Turn right to go back to the brightest position
+        StepsBack = Steps - BrightestStep
+        print(f"Turning back {StepsBack} steps...")
 
-    for Step in range(StepsBack):
-        turn_right()
+        for Step in range(StepsBack):
+            turn_right()
 
-    print("Facing the light!")
+        print("Facing the light! Staying for 5 seconds...")
+
+        # Step 3: Stay on the bright spot by wiggling back and forth
+        WiggleDuration = 5.0   # Total time to stay (seconds)
+        WiggleStep = 0.25      # Each half-wiggle lasts this long
+        WiggleSpeed = 0.2      # Gentle speed for wiggling
+
+        elapsed = 0.0
+        forward = True
+        while elapsed < WiggleDuration:
+            if forward:
+                robot.value = (WiggleSpeed, WiggleSpeed)
+            else:
+                robot.value = (-WiggleSpeed, -WiggleSpeed)
+            time.sleep(WiggleStep)
+            elapsed += WiggleStep
+            forward = not forward
+
+        robot.stop()
+        print("Done staying. Scanning again...\n")
 
 except KeyboardInterrupt:
     pass
