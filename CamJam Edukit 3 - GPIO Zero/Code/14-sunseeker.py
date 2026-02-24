@@ -4,6 +4,7 @@
 # The right motor is inverted, so we flip its speed.
 
 import time
+import signal
 from gpiozero import CamJamKitRobot
 from sunsensor import SunSensor
 
@@ -29,6 +30,12 @@ def turn_right():
     time.sleep(TurnStep)
     robot.stop()
     time.sleep(0.2)
+
+# Stop motors when systemd sends SIGTERM (e.g. systemctl stop)
+def handle_stop(signum, frame):
+    raise KeyboardInterrupt
+
+signal.signal(signal.SIGTERM, handle_stop)
 
 try:
     print("Sun Seeker starting! (Ctrl+C to stop)")
